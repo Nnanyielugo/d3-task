@@ -28,11 +28,8 @@ export default function draw(node: Ref, data: ChartData[]) {
       }) as unknown as Date[]
     )
     .range([0, WIDTH]);
-
-  const yAxis = d3
-    .scaleLinear()
-    .domain([0, d3.max(data, (d) => +d.value) as number])
-    .range([HEIGHT, 0]);
+  const max = d3.max(data, (d) => +d.value) as number;
+  const yAxis = d3.scaleLinear().domain([0, max]).range([HEIGHT, 0]);
 
   svg
     .append('g')
@@ -41,15 +38,34 @@ export default function draw(node: Ref, data: ChartData[]) {
 
   svg.append('g').call(d3.axisLeft(yAxis));
 
+  // set gradient
+  svg
+    .append('linearGradient')
+    .attr('id', 'line-gradient')
+    .attr('gradientUnits', 'userSpaceOnUse')
+    .attr('x1', 0)
+    .attr('y1', yAxis(0))
+    .attr('x2', 0)
+    .attr('y2', yAxis(max))
+    .selectAll('stop')
+    .data([
+      { offset: '0%', color: 'blue' },
+      { offset: '100%', color: 'red' },
+    ])
+    .enter()
+    .append('stop')
+    .attr('offset', (d) => d.offset)
+    .attr('stop-color', (d) => d.color);
+
   //  draw
   svg
     .append('path')
     .datum(data)
     .attr('fill', 'none')
-    .attr('stroke', 'steelblue')
+    .attr('stroke', 'url(#line-gradient')
     .attr('stroke-linejoin', 'round')
     .attr('stroke-linecap', 'round')
-    .attr('stroke-width', 1.5)
+    .attr('stroke-width', 2)
     .attr(
       'd',
       d3
