@@ -58,7 +58,7 @@ export default function draw(node: Ref, data: ChartData[]) {
     .attr('stop-color', (d) => d.color);
 
   //  draw
-  svg
+  const path = svg
     .append('path')
     .datum(data)
     .attr('fill', 'none')
@@ -73,4 +73,17 @@ export default function draw(node: Ref, data: ChartData[]) {
         .x((d) => xAxis(d.date))
         .y((d) => yAxis(d.value))
     );
+
+  const pathLength = path.node()!.getTotalLength();
+
+  // add transition
+  path
+    .attr('stroke-dash-offset', pathLength)
+    .attr('stroke-dasharray', pathLength)
+    .transition()
+    .duration(3500)
+    .ease(d3.easeSin)
+    .attrTween('stroke-dasharray', function () {
+      return d3.interpolate(`0,${pathLength}`, `${pathLength},${pathLength}`);
+    });
 }
