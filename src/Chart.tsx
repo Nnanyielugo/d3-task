@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as d3 from 'd3';
 
 import type { Ref } from './interfaces';
-import draw from './draw';
+import { create, cleanup } from './draw';
 interface ChartData {
   date: Date;
   value: number;
@@ -18,7 +18,7 @@ const Chart = () => {
         value: +d.total_rev,
       };
     }).then((data: ChartData[]) => {
-      draw(ref, data);
+      create(ref, data);
     });
   });
 

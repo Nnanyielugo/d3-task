@@ -11,9 +11,15 @@ const margin: Margin = {
   left: 80,
 };
 
-export default function draw(node: Ref, data: ChartData[]) {
-  console.log(data);
-  const svg = d3
+let svg: d3.Selection<SVGGElement, unknown, null, undefined>;
+let xAxis: d3.ScaleTime<number, number, never>;
+let yAxis: d3.ScaleLinear<number, number, never>;
+let xScale: d3.Axis<Date | d3.NumberValue>;
+let max: number;
+
+export function create(node: Ref, data: ChartData[]) {
+  cleanup();
+  svg = d3
     .select(node.current)
     .append('svg')
     .attr('width', WIDTH + margin.left + margin.right)
@@ -21,7 +27,7 @@ export default function draw(node: Ref, data: ChartData[]) {
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-  const xAxis = d3
+  xAxis = d3
     .scaleTime()
     .domain(
       d3.extent(data, function (d) {
@@ -30,11 +36,18 @@ export default function draw(node: Ref, data: ChartData[]) {
     )
     .range([0, WIDTH]);
 
-  const xScale = d3.axisBottom(xAxis);
+  xScale = d3.axisBottom(xAxis);
 
-  const max = d3.max(data, (d) => +d.value) as number;
-  const yAxis = d3.scaleLinear().domain([0, max]).range([HEIGHT, 0]);
+  max = d3.max(data, (d) => +d.value) as number;
+  yAxis = d3.scaleLinear().domain([0, max]).range([HEIGHT, 0]);
+  draw(data);
+}
 
+export function cleanup() {
+  d3.select('svg').remove();
+}
+
+export function draw(data: ChartData[]) {
   svg
     .append('g')
     .attr('transform', `translate(0, ${HEIGHT})`)
