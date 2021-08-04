@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import './draw.css';
 import type { ChartData, Margin, Ref } from './interfaces';
 
 const WIDTH = 1200;
@@ -76,8 +77,8 @@ export function draw(data: ChartData[]) {
     .attr('y2', yAxis(max))
     .selectAll('stop')
     .data([
-      { offset: '0%', color: 'blue' },
-      { offset: '100%', color: 'red' },
+      { offset: '0%', color: 'red' },
+      { offset: '100%', color: 'blue' },
     ])
     .enter()
     .append('stop')
@@ -92,7 +93,7 @@ export function draw(data: ChartData[]) {
     .attr('stroke', 'url(#line-gradient)')
     .attr('stroke-linejoin', 'round')
     .attr('stroke-linecap', 'round')
-    .attr('stroke-width', 2)
+    .attr('stroke-width', 1.8)
     .attr(
       'd',
       d3
@@ -126,26 +127,18 @@ export function draw(data: ChartData[]) {
   const focus = svg
     .append('g')
     .append('circle')
-    .style('fill', 'black')
+    .style('fill', 'grey')
     .attr('stroke', 'black')
-    .attr('r', 2.5)
+    .attr('r', 4.5)
     .style('opacity', 0);
 
-  const group = svg.append('g');
-  const dateText = group
-    .append('text')
-    .attr('stroke', 'steelblue')
-    .style('opacity', 0)
-    .style('font-size', 10)
-    .style('font-weight', '100');
-  const valueText = group
-    .append('text')
-    .attr('stroke', 'steelblue')
-    .style('opacity', 0)
-    .style('font-size', 10)
-    .style('font-weight', '100');
-
   const bisect = d3.bisector((d: ChartData) => d.date).left;
+
+  const div = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0);
 
   function moveFn(evt: MouseEvent) {
     const x0 = xAxis.invert(d3.pointer(evt)[0]);
@@ -157,25 +150,21 @@ export function draw(data: ChartData[]) {
         ? d1
         : d0;
     const { date, value } = d;
-    focus.attr('cx', xAxis(date)).attr('cy', yAxis(value)).style('opacity', 1);
 
-    dateText
-      .attr('x', WIDTH / 2)
-      .attr('y', -20)
-      .style('opacity', 1)
-      .text(formatDate(date));
-
-    valueText
-      .attr('x', WIDTH / 2 + 80)
-      .attr('y', -20)
-      .style('opacity', 1)
-      .text(value.toFixed(2));
+    const baseX = xAxis(date);
+    const baseY = yAxis(value);
+    const [x, y] = d3.pointer(evt);
+    div.transition().duration(50).style('opacity', 0.9);
+    div
+      .html(`${formatDate(date)}<br />${value.toFixed(2)}`)
+      .style('left', `${x}px`)
+      .style('top', `${y}px`);
+    focus.attr('cx', baseX).attr('cy', baseY).style('opacity', 1);
   }
 
   function leaveFn() {
     focus.style('opacity', 0);
-    dateText.style('opacity', 0);
-    valueText.style('opacity', 0);
+    div.style('opacity', 0);
   }
 
   // create a rectangle on top the svg area to recover mouse positions

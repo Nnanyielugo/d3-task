@@ -2,6 +2,23 @@
   text-align: center;
 }
 
+.tooltip {
+  width: 94px;
+  padding: 4px 10px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  position: absolute;
+  background-color: white;
+  font-size: 14px;
+  pointer-events: none;
+  -webkit-transition: all 0.25s;
+  -moz-transition: all 0.25s;
+  -ms-transition: all 0.25s;
+  -o-transition: all 0.25s;
+  transition: all 0.25s;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

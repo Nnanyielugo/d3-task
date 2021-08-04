@@ -22,7 +22,7 @@ const Chart = () => {
     });
   });
 
-  return <div ref={ref} />;
+  return <div id="chart" ref={ref} />;
 };
 
 export default Chart;
