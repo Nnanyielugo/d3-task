@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/Nnanyielugo/d3-task/static/css/main.96345ccd.chunk.css",
+    "main.js": "/Nnanyielugo/d3-task/static/js/main.9e20ea23.chunk.js",
+    "main.js.map": "/Nnanyielugo/d3-task/static/js/main.9e20ea23.chunk.js.map",
+    "runtime-main.js": "/Nnanyielugo/d3-task/static/js/runtime-main.9875cfef.js",
+    "runtime-main.js.map": "/Nnanyielugo/d3-task/static/js/runtime-main.9875cfef.js.map",
+    "static/js/2.1fa5e1a5.chunk.js": "/Nnanyielugo/d3-task/static/js/2.1fa5e1a5.chunk.js",
+    "static/js/2.1fa5e1a5.chunk.js.map": "/Nnanyielugo/d3-task/static/js/2.1fa5e1a5.chunk.js.map",
+    "static/js/3.92fb2eb0.chunk.js": "/Nnanyielugo/d3-task/static/js/3.92fb2eb0.chunk.js",
+    "static/js/3.92fb2eb0.chunk.js.map": "/Nnanyielugo/d3-task/static/js/3.92fb2eb0.chunk.js.map",
+    "index.html": "/Nnanyielugo/d3-task/index.html",
+    "static/css/main.96345ccd.chunk.css.map": "/Nnanyielugo/d3-task/static/css/main.96345ccd.chunk.css.map",
+    "static/js/2.1fa5e1a5.chunk.js.LICENSE.txt": "/Nnanyielugo/d3-task/static/js/2.1fa5e1a5.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.9875cfef.js",
+    "static/js/2.1fa5e1a5.chunk.js",
+    "static/css/main.96345ccd.chunk.css",
+    "static/js/main.9e20ea23.chunk.js"
+  ]
+}
