@@ -24,7 +24,9 @@ let focus: d3.Selection<SVGCircleElement, unknown, null, undefined>;
 let tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 let tpDate: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 let tpValue: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-
+// let path:
+//   | d3.Selection<SVGPathElement, ChartData[], null, undefined>
+//   | d3.Transition<SVGPathElement, ChartData[], null, undefined>;
 let bisect: (
   array: ArrayLike<ChartData>,
   x: Date,
@@ -32,8 +34,12 @@ let bisect: (
   hi?: number | undefined
 ) => number;
 let line: D3SVGSelection;
-let drawX: D3SVGSelection;
-let drawY: D3SVGSelection;
+let drawX:
+  | D3SVGSelection
+  | d3.Transition<SVGGElement, unknown, null, undefined>;
+let drawY:
+  | D3SVGSelection
+  | d3.Transition<SVGGElement, unknown, null, undefined>;
 let idleTimeout: NodeJS.Timer | null;
 let brush: any; // FIX ME
 
@@ -54,17 +60,9 @@ export function create(node: Ref, data: ChartData[], showInteraction: boolean) {
     .append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-  xAxis = d3
-    .scaleTime()
-    .domain(
-      d3.extent(data, function (d) {
-        return d.date;
-      }) as unknown as Date[]
-    )
-    .range([0, WIDTH]);
+  xAxis = d3.scaleTime().range([0, WIDTH]);
 
-  max = d3.max(data, (d) => +d.value) as number;
-  yAxis = d3.scaleLinear().domain([0, max]).range([HEIGHT, 0]);
+  yAxis = d3.scaleLinear().range([HEIGHT, 0]);
 
   focus = svg
     .append('g')
@@ -85,6 +83,22 @@ export function create(node: Ref, data: ChartData[], showInteraction: boolean) {
   tpValue = tooltip.append('div');
   tpValue.append('span').attr('class', 'tooltip-value');
 
+  if (showInteraction) {
+    drawX = svg
+      .append('g')
+      .transition()
+      .duration(500)
+      .attr('transform', `translate(0, ${HEIGHT})`)
+      .attr('class', 'x-axis');
+    drawY = svg.append('g').transition().duration(500).attr('class', 'y-axis');
+  } else {
+    drawX = svg
+      .append('g')
+      .attr('transform', `translate(0, ${HEIGHT})`)
+      .attr('class', 'x-axis');
+    drawY = svg.append('g').attr('class', 'y-axis');
+  }
+
   draw(data, showInteraction);
 }
 
@@ -93,20 +107,13 @@ export function cleanup() {
 }
 
 export function draw(data: ChartData[], showInteraction: boolean) {
-  drawX = svg.append('g').attr('transform', `translate(0, ${HEIGHT})`).call(
-    d3.axisBottom(xAxis)
-    // .ticks(d3.timeMonth)
-    // .tickFormat(((d: Date) => {
-    //   return d.getTime() <= d3.timeYear(d).getTime()
-    //     ? d.getFullYear()
-    //     : d.toLocaleString('en', {
-    //         month: 'short',
-    //       });
-    // }) as any)
+  max = d3.max(data, (d) => +d.value) as number;
+  xAxis.domain(
+    d3.extent(data, function (d) {
+      return d.date;
+    }) as unknown as Date[]
   );
-  // .call(xScale.ticks(d3.timeMonth).tickFormat(d3.timeFormat('%b') as any));
-
-  drawY = svg.append('g').call(d3.axisLeft(yAxis));
+  yAxis.domain([0, max]);
 
   // add a clipPath: everything outside the clip path won't be drawn
   svg
@@ -148,30 +155,48 @@ export function draw(data: ChartData[], showInteraction: boolean) {
 
   line = svg.append('g').attr('clip-path', 'url(#clip)');
 
-  //  draw
-  const path = line
-    .append('path')
-    .datum(data)
-    .attr('fill', 'none')
-    .attr('class', 'line')
-    .attr('stroke', showInteraction ? 'url(#line-gradient)' : 'steelblue')
-    .attr('stroke-linejoin', 'round')
-    .attr('stroke-linecap', 'round')
-    .attr('stroke-width', 1.8)
-    .attr(
-      'd',
-      d3
-        .line<ChartData>()
-        .x((d) => xAxis(d.date))
-        .y((d) => yAxis(d.value))
-    );
+  if (!showInteraction) {
+    drawX.transition().duration(1000).call(d3.axisBottom(xAxis));
+    drawY.transition().duration(1000).call(d3.axisLeft(yAxis));
 
-  // add brushing
-  line.append('g').attr('class', 'brush').call(brush);
+    line
+      .append('path')
+      .datum(data)
+      .transition()
+      .duration(1000)
+      .attr('fill', 'none')
+      .attr('class', 'line')
+      .attr('stroke', showInteraction ? 'url(#line-gradient)' : 'steelblue')
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-width', 1.8)
+      .attr(
+        'd',
+        d3
+          .line<ChartData>()
+          .x((d) => xAxis(d.date))
+          .y((d) => yAxis(d.value))
+      );
+  } else {
+    drawX.call(d3.axisBottom(xAxis));
 
-  // create a rectangle on top the svg area to recover mouse positions
-
-  if (showInteraction) {
+    drawY.call(d3.axisLeft(yAxis));
+    const path = line
+      .append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('class', 'line')
+      .attr('stroke', showInteraction ? 'url(#line-gradient)' : 'steelblue')
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-width', 1.8)
+      .attr(
+        'd',
+        d3
+          .line<ChartData>()
+          .x((d) => xAxis(d.date))
+          .y((d) => yAxis(d.value))
+      );
     const pathLength = path.node()!.getTotalLength();
     // add transition
     path
@@ -183,15 +208,6 @@ export function draw(data: ChartData[], showInteraction: boolean) {
       .attrTween('stroke-dasharray', function () {
         return d3.interpolate(`0,${pathLength}`, `${pathLength},${pathLength}`);
       });
-
-    // svg
-    //   .append('rect')
-    //   .style('fill', 'none')
-    //   .style('pointer-events', 'all')
-    //   .attr('width', WIDTH)
-    //   .attr('height', HEIGHT)
-    //   .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
-    //   .on('touchend mouseleave', leaveFn);
 
     svg
       .append('g')
@@ -206,6 +222,8 @@ export function draw(data: ChartData[], showInteraction: boolean) {
       .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
       .on('touchend mouseleave', leaveFn);
   }
+  // add brushing
+  line.append('g').attr('class', 'brush').call(brush);
 }
 
 function moveFn(evt: MouseEvent, data: ChartData[]) {
@@ -219,11 +237,8 @@ function moveFn(evt: MouseEvent, data: ChartData[]) {
       : d0;
   const { date, value } = d;
 
-  // use baseX and baseY to make the tooltip move with the pointer on the exact valie on the chart
   const baseX = xAxis(date);
   const baseY = yAxis(value);
-  // use pointerX and pointerY to make the tooltip move with the mouse
-  const [x, y] = d3.pointer(evt);
 
   tooltip.style('opacity', 0.9);
   tooltip.select('.tooltip-date').text(formatDate(date));
