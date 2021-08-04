@@ -17,6 +17,14 @@ let xAxis: d3.ScaleTime<number, number, never>;
 let yAxis: d3.ScaleLinear<number, number, never>;
 let xScale: d3.Axis<Date | d3.NumberValue>;
 let max: number;
+let focus: d3.Selection<SVGCircleElement, unknown, null, undefined>;
+let div: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+let bisect: (
+  array: ArrayLike<ChartData>,
+  x: Date,
+  lo?: number | undefined,
+  hi?: number | undefined
+) => number;
 
 export function create(node: Ref, data: ChartData[]) {
   cleanup();
@@ -41,6 +49,23 @@ export function create(node: Ref, data: ChartData[]) {
 
   max = d3.max(data, (d) => +d.value) as number;
   yAxis = d3.scaleLinear().domain([0, max]).range([HEIGHT, 0]);
+
+  focus = svg
+    .append('g')
+    .append('circle')
+    .style('fill', 'grey')
+    .attr('stroke', 'black')
+    .attr('r', 4.5)
+    .style('opacity', 0);
+
+  bisect = d3.bisector((d: ChartData) => d.date).left;
+
+  div = d3
+    .select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('opacity', 0);
+
   draw(data);
 }
 
@@ -103,7 +128,6 @@ export function draw(data: ChartData[]) {
     );
 
   const pathLength = path.node()!.getTotalLength();
-
   // add transition
   path
     .attr('stroke-dash-offset', pathLength)
@@ -115,58 +139,6 @@ export function draw(data: ChartData[]) {
       return d3.interpolate(`0,${pathLength}`, `${pathLength},${pathLength}`);
     });
 
-  function formatDate(date: Date) {
-    return date.toLocaleString('en', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: 'UTC',
-    });
-  }
-
-  const focus = svg
-    .append('g')
-    .append('circle')
-    .style('fill', 'grey')
-    .attr('stroke', 'black')
-    .attr('r', 4.5)
-    .style('opacity', 0);
-
-  const bisect = d3.bisector((d: ChartData) => d.date).left;
-
-  const div = d3
-    .select('body')
-    .append('div')
-    .attr('class', 'tooltip')
-    .style('opacity', 0);
-
-  function moveFn(evt: MouseEvent) {
-    const x0 = xAxis.invert(d3.pointer(evt)[0]);
-    const index = bisect(data, x0, 1);
-    const d0 = data[index - 1];
-    const d1 = data[index];
-    const d =
-      x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime()
-        ? d1
-        : d0;
-    const { date, value } = d;
-
-    const baseX = xAxis(date);
-    const baseY = yAxis(value);
-    const [x, y] = d3.pointer(evt);
-    div.transition().duration(50).style('opacity', 0.9);
-    div
-      .html(`${formatDate(date)}<br />${value.toFixed(2)}`)
-      .style('left', `${x}px`)
-      .style('top', `${y}px`);
-    focus.attr('cx', baseX).attr('cy', baseY).style('opacity', 1);
-  }
-
-  function leaveFn() {
-    focus.style('opacity', 0);
-    div.style('opacity', 0);
-  }
-
   // create a rectangle on top the svg area to recover mouse positions
   svg
     .append('rect')
@@ -174,6 +146,45 @@ export function draw(data: ChartData[]) {
     .style('pointer-events', 'all')
     .attr('width', WIDTH)
     .attr('height', HEIGHT)
-    .on('touchmove mousemove', moveFn)
+    .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
     .on('touchend mouseleave', leaveFn);
+}
+
+function moveFn(evt: MouseEvent, data: ChartData[]) {
+  const x0 = xAxis.invert(d3.pointer(evt)[0]);
+  const index = bisect(data, x0, 1);
+  const d0 = data[index - 1];
+  const d1 = data[index];
+  const d =
+    x0.getTime() - d0.date.getTime() > d1.date.getTime() - x0.getTime()
+      ? d1
+      : d0;
+  const { date, value } = d;
+
+  // use baseX and baseY to make the tooltip move with the pointer on the exact valie on the chart
+  const baseX = xAxis(date);
+  const baseY = yAxis(value);
+  // use pointerX and pointerY to make the tooltip move with the mouse
+  const [x, y] = d3.pointer(evt);
+
+  div.style('opacity', 0.9);
+  div
+    .html(`${formatDate(date)}<br />${value.toFixed(2)}`)
+    .style('left', `${baseX}px`)
+    .style('top', `${baseY}px`);
+  focus.attr('cx', baseX).attr('cy', baseY).style('opacity', 1);
+}
+
+function leaveFn() {
+  focus.style('opacity', 0);
+  div.style('opacity', 0);
+}
+
+function formatDate(date: Date) {
+  return date.toLocaleString('en', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
