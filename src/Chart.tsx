@@ -18,7 +18,7 @@ const Chart = () => {
         value: +d.total_rev,
       };
     }).then((data: ChartData[]) => {
-      create(ref, data);
+      create(ref, data, true);
     });
   });
 
