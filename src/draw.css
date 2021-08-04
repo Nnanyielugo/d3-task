@@ -14,3 +14,13 @@
   -o-transition: all 0.25s;
   transition: all 0.25s;
 }
+
+.tooltip div {
+  margin: 3px 0;
+}
+
+.tooltip-date {
+  font-weight: bold;
+}
+.tooltip-value {
+}

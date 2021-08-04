@@ -3,7 +3,7 @@ import './draw.css';
 import type { ChartData, Margin, Ref } from './interfaces';
 
 const WIDTH = 1200;
-const HEIGHT = 700;
+const HEIGHT = 600;
 
 const margin: Margin = {
   top: 50,
@@ -21,7 +21,10 @@ let xAxis: d3.ScaleTime<number, number, never>;
 let yAxis: d3.ScaleLinear<number, number, never>;
 let max: number;
 let focus: d3.Selection<SVGCircleElement, unknown, null, undefined>;
-let div: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+let tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+let tpDate: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+let tpValue: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+
 let bisect: (
   array: ArrayLike<ChartData>,
   x: Date,
@@ -73,11 +76,14 @@ export function create(node: Ref, data: ChartData[], showInteraction: boolean) {
 
   bisect = d3.bisector((d: ChartData) => d.date).left;
 
-  div = d3
+  tooltip = d3
     .select('body')
     .append('div')
     .attr('class', 'tooltip')
     .style('opacity', 0);
+  tpDate = tooltip.append('div').attr('class', 'tooltip-date');
+  tpValue = tooltip.append('div');
+  tpValue.append('span').attr('class', 'tooltip-value');
 
   draw(data, showInteraction);
 }
@@ -103,7 +109,7 @@ export function draw(data: ChartData[], showInteraction: boolean) {
   drawY = svg.append('g').call(d3.axisLeft(yAxis));
 
   // add a clipPath: everything outside the clip path won't be drawn
-  const clip = svg
+  svg
     .append('defs')
     .append('svg:clipPath')
     .attr('id', 'clip')
@@ -164,24 +170,6 @@ export function draw(data: ChartData[], showInteraction: boolean) {
   line.append('g').attr('class', 'brush').call(brush);
 
   // create a rectangle on top the svg area to recover mouse positions
-  // svg
-  //   .append('rect')
-  //   .style('fill', 'none')
-  //   .style('pointer-events', 'all')
-  //   .attr('width', WIDTH)
-  //   .attr('height', HEIGHT)
-  //   .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
-  //   .on('touchend mouseleave', leaveFn);
-  // svg
-  //   .append('g')
-  //   .attr('fill', 'none')
-  //   .attr('pointer-events', 'all')
-  //   .selectAll('rect')
-  //   .join('rect')
-  //   .attr('width', WIDTH)
-  //   .attr('height', HEIGHT)
-  //   .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
-  //   .on('touchend mouseleave', leaveFn);
 
   if (showInteraction) {
     const pathLength = path.node()!.getTotalLength();
@@ -195,6 +183,15 @@ export function draw(data: ChartData[], showInteraction: boolean) {
       .attrTween('stroke-dasharray', function () {
         return d3.interpolate(`0,${pathLength}`, `${pathLength},${pathLength}`);
       });
+
+    // svg
+    //   .append('rect')
+    //   .style('fill', 'none')
+    //   .style('pointer-events', 'all')
+    //   .attr('width', WIDTH)
+    //   .attr('height', HEIGHT)
+    //   .on('touchmove mousemove', (evt: MouseEvent) => moveFn(evt, data))
+    //   .on('touchend mouseleave', leaveFn);
 
     svg
       .append('g')
@@ -228,17 +225,16 @@ function moveFn(evt: MouseEvent, data: ChartData[]) {
   // use pointerX and pointerY to make the tooltip move with the mouse
   const [x, y] = d3.pointer(evt);
 
-  div.style('opacity', 0.9);
-  div
-    .html(`${formatDate(date)}<br />${value.toFixed(2)}`)
-    .style('left', `${baseX}px`)
-    .style('top', `${baseY}px`);
+  tooltip.style('opacity', 0.9);
+  tooltip.select('.tooltip-date').text(formatDate(date));
+  tooltip.select('.tooltip-value').text(value.toFixed(2));
+  tooltip.style('left', `${evt.pageX}px`).style('top', `${evt.pageY}px`);
   focus.attr('cx', baseX).attr('cy', baseY).style('opacity', 1);
 }
 
 function leaveFn() {
   focus.style('opacity', 0);
-  div.style('opacity', 0);
+  tooltip.style('opacity', 0);
 }
 
 function formatDate(date: Date) {
