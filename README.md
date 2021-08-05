@@ -2,7 +2,7 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-View live app [here](https://Nnanyielugo.github.io/d3-task)
+You can view the live app [here](https://Nnanyielugo.github.io/d3-task)
 
 #### Installing:
 - clone or download this repository `git clone {repository url}`
