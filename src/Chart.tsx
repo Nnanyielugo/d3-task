@@ -18,15 +18,19 @@ const Chart = () => {
   };
 
   React.useEffect(() => {
-    d3.dsv(',', '/data/aggregated_stock_exchange.csv', (d: any): ChartData => {
-      return {
-        date: new Date(d.date),
-        value:
-          chartType === 'total_revenue'
-            ? +d[valueMap.total_revenue]
-            : +d[valueMap.total_volume],
-      };
-    }).then((data: ChartData[]) => {
+    d3.dsv(
+      ',',
+      `${process.env.PUBLIC_URL}/data/aggregated_stock_exchange.csv`,
+      (d: any): ChartData => {
+        return {
+          date: new Date(d.date),
+          value:
+            chartType === 'total_revenue'
+              ? +d[valueMap.total_revenue]
+              : +d[valueMap.total_volume],
+        };
+      }
+    ).then((data: ChartData[]) => {
       create(ref, data, showInteraction);
     });
   });
