@@ -20,7 +20,7 @@ export default function Header() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <CustomAppBar>
-        <AppBarText>Syrup Screener</AppBarText>
+        <AppBarText>Syrup Tech Screener</AppBarText>
       </CustomAppBar>
     </Box>
   );
