@@ -1,10 +1,10 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 
-import { create, cleanup, draw } from './draw';
-import SplitButton from './SplitButton';
+import { create } from '../Components/d3';
+import SplitButton from '../Components/SplitButton';
 
-import type { Ref } from './interfaces';
+import type { Ref } from '../interfaces';
 interface ChartData {
   date: Date;
   value: number;

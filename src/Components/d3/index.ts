@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import './draw.css';
-import type { ChartData, Margin, Ref } from './interfaces';
+import './index.css';
+import type { ChartData, Margin, Ref } from '../../interfaces';
 
 const WIDTH = 1200;
 const HEIGHT = 600;
@@ -24,9 +24,6 @@ let focus: d3.Selection<SVGCircleElement, unknown, null, undefined>;
 let tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 let tpDate: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 let tpValue: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-// let path:
-//   | d3.Selection<SVGPathElement, ChartData[], null, undefined>
-//   | d3.Transition<SVGPathElement, ChartData[], null, undefined>;
 let bisect: (
   array: ArrayLike<ChartData>,
   x: Date,
@@ -102,11 +99,11 @@ export function create(node: Ref, data: ChartData[], showInteraction: boolean) {
   draw(data, showInteraction);
 }
 
-export function cleanup() {
+function cleanup() {
   d3.select('svg').remove();
 }
 
-export function draw(data: ChartData[], showInteraction: boolean) {
+function draw(data: ChartData[], showInteraction: boolean) {
   max = d3.max(data, (d) => +d.value) as number;
   xAxis.domain(
     d3.extent(data, function (d) {
@@ -294,18 +291,5 @@ function idled() {
 }
 
 function reinitialize() {
-  // xAxis.domain(d3.extent(graphData, (d) => d.date) as any);
-  // drawX.transition().call(d3.axisBottom(xAxis));
-  // line
-  //   .select('.line')
-  //   .transition()
-  //   .duration(1000)
-  //   .attr(
-  //     'd',
-  //     d3
-  //       .line()
-  //       .x((d: any) => xAxis(d.date))
-  //       .y((d: any) => yAxis(d.value)) as any
-  //   );
   create(parentNode, graphData, showTPInteraction);
 }
