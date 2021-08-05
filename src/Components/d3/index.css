@@ -1,5 +1,5 @@
 .tooltip {
-  width: 94px;
+  width: 100px;
   padding: 4px 10px;
   border: 1px solid #aaa;
   border-radius: 4px;
@@ -23,4 +23,11 @@
   font-weight: bold;
 }
 .tooltip-value {
+  font-size: 12px;
+}
+
+.tooltip-label {
+  font-weight: bold;
+  margin-right: 2px;
+  font-size: 13px;
 }

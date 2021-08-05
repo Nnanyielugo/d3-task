@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { formatMoney, formatNumber } from 'accounting';
 import './index.css';
 import type { ChartData, Margin, Ref } from '../../interfaces';
 
@@ -85,6 +86,7 @@ export function create(
     .style('opacity', 0);
   tpDate = tooltip.append('div').attr('class', 'tooltip-date');
   tpValue = tooltip.append('div');
+  tpValue.append('span').attr('class', 'tooltip-label');
   tpValue.append('span').attr('class', 'tooltip-value');
 
   if (showInteraction) {
@@ -130,13 +132,7 @@ function draw(data: ChartData[], showInteraction: boolean) {
     .attr('x', 0)
     .attr('y', 0);
 
-  svg
-    .append('g')
-    .append('text')
-    // .attr('transform', 'rotate(-90)')
-    .attr('y', -10)
-    .attr('x', -20)
-    .text(YALabel);
+  svg.append('g').append('text').attr('y', -10).attr('x', -20).text(YALabel);
 
   brush = d3
     .brushX()
@@ -254,7 +250,10 @@ function moveFn(evt: MouseEvent, data: ChartData[]) {
 
   tooltip.style('opacity', 0.9);
   tooltip.select('.tooltip-date').text(formatDate(date));
-  tooltip.select('.tooltip-value').text(value.toFixed(2));
+  tooltip
+    .select('.tooltip-value')
+    .text(YALabel === '$' ? formatMoney(value) : formatNumber(value));
+  tooltip.select('.tooltip-label').text(YALabel);
   tooltip.style('left', `${evt.pageX}px`).style('top', `${evt.pageY}px`);
   focus.attr('cx', baseX).attr('cy', baseY).style('opacity', 1);
 }

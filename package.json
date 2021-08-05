@@ -13,6 +13,7 @@
     "@types/node": "^12.20.17",
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
+    "accounting": "^0.4.1",
     "d3": "^7.0.0",
     "gh-pages": "^3.2.3",
     "react": "^17.0.2",
@@ -48,6 +49,7 @@
     ]
   },
   "devDependencies": {
+    "@types/accounting": "^0.4.2",
     "@types/d3": "^7.0.0"
   }
 }
