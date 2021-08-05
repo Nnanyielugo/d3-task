@@ -24,9 +24,11 @@ const chartTypeOptions = [
   { label: 'Selectable Dates', value: false },
 ];
 
+type ChartType = 'total_revenue' | 'total_volume';
+
 const Chart = () => {
   const ref: Ref = React.createRef();
-  const [chartType, setChartType] = React.useState('total_revenue');
+  const [chartType, setChartType] = React.useState<ChartType>('total_revenue');
   const [showInteraction, setShowInteraction] = React.useState(true);
 
   React.useEffect(() => {
@@ -43,11 +45,16 @@ const Chart = () => {
         };
       }
     ).then((data: ChartData[]) => {
-      create(ref, data, showInteraction);
+      create(
+        ref,
+        data,
+        showInteraction,
+        chartType === 'total_revenue' ? '$' : 'N'
+      );
     });
   });
 
-  const handleChangeChartType = (inputType: string) => {
+  const handleChangeChartType = (inputType: ChartType) => {
     setChartType(inputType);
   };
 

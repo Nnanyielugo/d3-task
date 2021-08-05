@@ -43,12 +43,19 @@ let brush: any; // FIX ME
 let graphData: ChartData[];
 let showTPInteraction: boolean;
 let parentNode: Ref;
+let YALabel: string;
 
-export function create(node: Ref, data: ChartData[], showInteraction: boolean) {
+export function create(
+  node: Ref,
+  data: ChartData[],
+  showInteraction: boolean,
+  yAxisLabel: string
+) {
   cleanup();
   graphData = data;
   showTPInteraction = showInteraction;
   parentNode = node;
+  YALabel = yAxisLabel;
   svg = d3
     .select(node.current)
     .append('svg')
@@ -122,6 +129,14 @@ function draw(data: ChartData[], showInteraction: boolean) {
     .attr('height', HEIGHT)
     .attr('x', 0)
     .attr('y', 0);
+
+  svg
+    .append('g')
+    .append('text')
+    // .attr('transform', 'rotate(-90)')
+    .attr('y', -10)
+    .attr('x', -20)
+    .text(YALabel);
 
   brush = d3
     .brushX()
@@ -291,5 +306,5 @@ function idled() {
 }
 
 function reinitialize() {
-  create(parentNode, graphData, showTPInteraction);
+  create(parentNode, graphData, showTPInteraction, YALabel);
 }
