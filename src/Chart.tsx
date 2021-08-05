@@ -1,21 +1,33 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 
-import type { Ref } from './interfaces';
 import { create, cleanup, draw } from './draw';
+import SplitButton from './SplitButton';
+
+import type { Ref } from './interfaces';
 interface ChartData {
   date: Date;
   value: number;
 }
 
+const valueMap = {
+  total_revenue: 'total_rev',
+  total_volume: 'total_vol',
+};
+
+const dataOptions = [
+  { label: 'Total Revenue', value: 'total_revenue' },
+  { label: 'Total Volume', value: 'total_volume' },
+];
+const chartTypeOptions = [
+  { label: 'Tooltip and Animated Gradient', value: true },
+  { label: 'Selectable Dates', value: false },
+];
+
 const Chart = () => {
   const ref: Ref = React.createRef();
   const [chartType, setChartType] = React.useState('total_revenue');
   const [showInteraction, setShowInteraction] = React.useState(true);
-  const valueMap = {
-    total_revenue: 'total_rev',
-    total_volume: 'total_vol',
-  };
 
   React.useEffect(() => {
     d3.dsv(
@@ -46,21 +58,11 @@ const Chart = () => {
   return (
     <>
       <div id="chart" ref={ref} />
-      <button onClick={() => handleChangeChartType('total_revenue')}>
-        See total revenue
-      </button>
-      <button onClick={() => handleChangeChartType('total_volume')}>
-        See total volume
-      </button>
-      <br />
-      <br />
-      <br />
-      <button onClick={() => handleChangeInteraction(true)}>
-        Show Tooltip and animated gradient
-      </button>
-      <button onClick={() => handleChangeInteraction(false)}>
-        Show selectable dates
-      </button>
+      <SplitButton handleClick={handleChangeChartType} options={dataOptions} />
+      <SplitButton
+        handleClick={handleChangeInteraction}
+        options={chartTypeOptions}
+      />
     </>
   );
 };
